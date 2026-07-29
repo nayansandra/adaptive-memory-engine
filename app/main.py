@@ -1,3 +1,4 @@
+from typing import List
 from datetime import datetime
 from fastapi import FastAPI
 from app.models.memory import MemoryItemCreate, MemoryItem
@@ -31,5 +32,9 @@ def create_memory(memory: MemoryItemCreate):
 
     memory_store.append(memory_item)
     next_id += 1
-    
+
     return memory_item
+
+@app.get("/memory-items", response_model=List[MemoryItem])
+def get_memories():
+    return memory_store
