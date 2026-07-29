@@ -1,6 +1,6 @@
 from typing import List
 from datetime import datetime
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from app.models.memory import MemoryItemCreate, MemoryItem
 
 app = FastAPI()
@@ -20,12 +20,14 @@ def root():
 def create_memory(memory: MemoryItemCreate):
     global next_id
 
+    now=datetime.now()
+
     memory_item = MemoryItem(
         id=next_id,
         title=memory.content[:30],
         content=memory.content,
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
+        created_at=now,
+        updated_at=now,
         importance_score=0.0,
         access_count=0
     )
@@ -38,3 +40,14 @@ def create_memory(memory: MemoryItemCreate):
 @app.get("/memory-items", response_model=List[MemoryItem])
 def get_memories():
     return memory_store
+
+@app.get("/memory-items/{memory_id}", response_model=MemoryItem)
+def get_memory(memory_id: int):
+    for memory in memory_store:
+        if memory.id == memory_id:
+            return memory
+        
+    raise HTTPException(
+        status_code=404, 
+        detail=f"Memory with id {memory_id} not found."
+        )
