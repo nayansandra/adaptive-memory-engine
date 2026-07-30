@@ -13,3 +13,7 @@ class MemoryItem(BaseModel):
     updated_at: datetime
     importance_score: float
     access_count: int
+
+class MemoryItemUpdate(BaseModel):
+    title: str|None= None
+    content: str|None= None
