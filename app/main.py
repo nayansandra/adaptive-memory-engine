@@ -72,3 +72,14 @@ def update_memory(memory_id: int, update: MemoryItemUpdate):
         status_code=404, 
         detail=f"Memory with id {memory_id} not found."
         )
+
+@app.delete("/memory-items/{memory_id}", status_code=204)
+def delete_memory(memory_id: int):
+    for memory in memory_store:
+        if memory.id == memory_id:
+            memory_store.remove(memory)
+            return
+    raise HTTPException(
+        status_code=404,
+        detail=f"Memory with id {memory_id} not found."
+        )
