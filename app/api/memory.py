@@ -1,21 +1,25 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from app.models.memory import MemoryItem, MemoryItemCreate, MemoryItemUpdate
-from app.storage.memory_store import memory_store
 from app.services import memory_service
+from sqlalchemy.orm import Session
+from app.database.database import get_db
 
 router = APIRouter()
 
 @router.get("/memory-items", response_model=list[MemoryItem])
-def get_memories():
-    return memory_store
+def get_memories(db: Session = Depends(get_db)):
+    return memory_service.get_memories(db)
 
 @router.post("/memory-items", response_model=MemoryItem)
-def create_memory(memory: MemoryItemCreate):
-    return memory_service.create_memory(memory)
+def create_memory(memory: MemoryItemCreate, db: Session = Depends(get_db)):
+    return memory_service.create_memory(memory, db)
 
 @router.get("/memory-items/{memory_id}", response_model=MemoryItem)
-def get_memory(memory_id: int):
-    memory = memory_service.find_memory(memory_id)
+def get_memory(
+    memory_id: int,
+    db: Session = Depends(get_db)
+):
+    memory = memory_service.find_memory(memory_id, db)
 
     if memory is None:
         raise HTTPException(

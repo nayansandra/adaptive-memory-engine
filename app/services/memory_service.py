@@ -1,18 +1,14 @@
 from datetime import datetime
-
 from app.models.memory import MemoryItem, MemoryItemCreate, MemoryItemUpdate
 from app.storage.memory_store import memory_store
+from sqlalchemy.orm import Session
+from app.models.memory_db import Memory
 
 
-next_id = 1
-
-def create_memory(memory: MemoryItemCreate) -> MemoryItem:
-    global next_id
-
+def create_memory(memory: MemoryItemCreate, db: Session) -> Memory:
     now = datetime.now()
 
-    memory_item = MemoryItem(
-        id=next_id,
+    db_memory = Memory(
         title=memory.content[:30],
         content=memory.content,
         created_at=now,
@@ -21,16 +17,17 @@ def create_memory(memory: MemoryItemCreate) -> MemoryItem:
         access_count=0,
     )
 
-    memory_store.append(memory_item)
-    next_id += 1
+    db.add(db_memory)
+    db.commit()
+    db.refresh(db_memory)
 
-    return memory_item
+    return db_memory
 
-def find_memory(memory_id: int) -> MemoryItem|None:
-    for memory in memory_store:
-        if memory.id == memory_id:
-            return memory
-    return None
+def get_memories(db: Session) -> list[Memory]:
+    return db.query(Memory).all()
+
+def find_memory(memory_id: int, db: Session) -> Memory | None:
+    return db.query(Memory).filter(Memory.id == memory_id).first()
 
 def update_memory(memory_id: int, update: MemoryItemUpdate) -> MemoryItem | None:
 
