@@ -1,6 +1,5 @@
 from datetime import datetime
 from app.models.memory import MemoryItem, MemoryItemCreate, MemoryItemUpdate
-from app.storage.memory_store import memory_store
 from sqlalchemy.orm import Session
 from app.models.memory_db import Memory
 
@@ -29,9 +28,9 @@ def get_memories(db: Session) -> list[Memory]:
 def find_memory(memory_id: int, db: Session) -> Memory | None:
     return db.query(Memory).filter(Memory.id == memory_id).first()
 
-def update_memory(memory_id: int, update: MemoryItemUpdate) -> MemoryItem | None:
+def update_memory(memory_id: int, update: MemoryItemUpdate, db: Session) -> Memory | None:
 
-    memory = find_memory(memory_id)
+    memory = find_memory(memory_id, db)
 
     if memory is None:
         return None
@@ -44,13 +43,18 @@ def update_memory(memory_id: int, update: MemoryItemUpdate) -> MemoryItem | None
 
     memory.updated_at = datetime.now()
 
+    db.commit()
+    db.refresh(memory)
+
     return memory
 
-def delete_memory(memory_id: int) -> bool:
-    memory = find_memory(memory_id)
+def delete_memory(memory_id: int, db: Session) -> bool:
+    memory = find_memory(memory_id, db)
 
     if memory is None:
         return False
 
-    memory_store.remove(memory)
+    db.delete(memory)
+    db.commit()
+
     return True
