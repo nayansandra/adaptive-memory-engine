@@ -86,3 +86,55 @@ def test_get_memory_not_found():
     response = client.get("/memory-items/999999")
 
     assert response.status_code == 404
+
+#PATCH/memory-items/{id} test cases
+def test_update_memory_success():
+    create_response = client.post(
+        "/memory-items",
+        json={
+            "content": "Original content"
+        }
+    )
+
+    memory_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/memory-items/{memory_id}",
+        json={
+            "title": "Updated title"
+        }
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"] == memory_id
+    assert data["title"] == "Updated title"
+
+def test_update_memory_empty_request():
+    create_response = client.post(
+        "/memory-items",
+        json={
+            "content": "Patch test"
+        }
+    )
+
+    memory_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/memory-items/{memory_id}",
+        json={}
+    )
+
+    assert response.status_code == 400
+
+def test_update_memory_not_found():
+    response = client.patch(
+        "/memory-items/999999",
+        json={
+            "title": "Updated title"
+        }
+    )
+
+    assert response.status_code == 404
