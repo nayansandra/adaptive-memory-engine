@@ -13,3 +13,4 @@ class Memory(Base):
 
     importance_score = Column(Float, nullable=False, default=0.0)
     access_count = Column(Integer, nullable=False, default=0)
+    last_accessed_at = Column(DateTime, nullable=True)
