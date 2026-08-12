@@ -138,3 +138,27 @@ def test_update_memory_not_found():
     )
 
     assert response.status_code == 404
+
+#DELETE/memory-items/{id} test cases
+def test_delete_memory_success():
+    create_response = client.post(
+        "/memory-items",
+        json={
+            "content": "Memory to delete"
+        }
+    )
+
+    memory_id = create_response.json()["id"]
+
+    response = client.delete(
+        f"/memory-items/{memory_id}"
+    )
+
+    assert response.status_code == 204
+
+def test_delete_memory_not_found():
+    response = client.delete(
+        "/memory-items/999999"
+    )
+
+    assert response.status_code == 404
