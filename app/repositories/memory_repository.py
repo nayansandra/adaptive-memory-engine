@@ -29,6 +29,7 @@ def record_access(db: Session, memory: Memory) -> Memory:
 
     memory.access_count += 1
     memory.last_accessed_at = datetime.now(timezone.utc)
+    memory.importance_score = memory.access_count
 
     db.commit()
     db.refresh(memory)

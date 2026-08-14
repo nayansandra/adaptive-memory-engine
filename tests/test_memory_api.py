@@ -205,3 +205,48 @@ def test_multiple_get_requests_increment_access_count():
 
     assert response.status_code == 200
     assert data["access_count"] == 2
+
+#access updates importance score test cases
+def test_first_access_updates_importance_score():
+
+    create_response = client.post(
+        "/memory-items",
+        json={
+            "content": "Importance score test"
+        }
+    )
+
+    memory_id = create_response.json()["id"]
+
+    response = client.get(
+        f"/memory-items/{memory_id}"
+    )
+
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data["access_count"] == 1
+    assert data["importance_score"] == 1
+
+def test_multiple_accesses_update_importance_score():
+
+    create_response = client.post(
+        "/memory-items",
+        json={
+            "content": "Multiple importance test"
+        }
+    )
+
+    memory_id = create_response.json()["id"]
+
+    client.get(f"/memory-items/{memory_id}")
+
+    response = client.get(
+        f"/memory-items/{memory_id}"
+    )
+
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data["access_count"] == 2
+    assert data["importance_score"] == 2
