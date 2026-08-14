@@ -162,3 +162,46 @@ def test_delete_memory_not_found():
     )
 
     assert response.status_code == 404
+
+#GET/memory-items/{id} access count test cases
+def test_get_memory_increments_access_count():
+    create_response = client.post(
+        "/memory-items",
+        json={
+            "content": "Access tracking test"
+        }
+    )
+
+    memory_id = create_response.json()["id"]
+
+    response = client.get(
+        f"/memory-items/{memory_id}"
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["access_count"] == 1
+
+def test_multiple_get_requests_increment_access_count():
+
+    create_response = client.post(
+        "/memory-items",
+        json={
+            "content": "Multiple access test"
+        }
+    )
+
+    memory_id = create_response.json()["id"]
+
+    client.get(f"/memory-items/{memory_id}")
+
+    response = client.get(
+        f"/memory-items/{memory_id}"
+    )
+
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data["access_count"] == 2

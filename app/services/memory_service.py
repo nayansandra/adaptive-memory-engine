@@ -52,3 +52,12 @@ def delete_memory(memory_id: int, db: Session) -> bool:
     memory_repository.delete(db,memory)
     
     return True
+
+def get_memory_and_track_access(memory_id: int, db: Session) -> Memory | None:
+
+    memory = memory_repository.get_by_id(db, memory_id)
+
+    if memory is None:
+        return None
+
+    return memory_repository.record_access(db, memory)

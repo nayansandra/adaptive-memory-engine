@@ -17,11 +17,8 @@ def create_memory(memory: MemoryItemCreate, db: Session = Depends(get_db)):
     return memory_service.create_memory(memory, db)
 
 @router.get("/memory-items/{memory_id}", response_model=MemoryItem)
-def get_memory(
-    memory_id: int,
-    db: Session = Depends(get_db)
-):
-    memory = memory_service.find_memory(memory_id, db)
+def get_memory(memory_id: int, db: Session = Depends(get_db)):
+    memory = memory_service.get_memory_and_track_access(memory_id, db)
 
     if memory is None:
         raise HTTPException(
