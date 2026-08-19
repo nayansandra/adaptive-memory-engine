@@ -16,6 +16,10 @@ def create_memory(memory: MemoryItemCreate, db: Session = Depends(get_db)):
 
     return memory_service.create_memory(memory, db)
 
+@router.get("/memory-items/ranked", response_model=list[MemoryItem])
+def get_ranked_memories(db: Session = Depends(get_db)):
+    return memory_service.get_ranked_memories(db)
+
 @router.get("/memory-items/{memory_id}", response_model=MemoryItem)
 def get_memory(memory_id: int, db: Session = Depends(get_db)):
     memory = memory_service.get_memory_and_track_access(memory_id, db)

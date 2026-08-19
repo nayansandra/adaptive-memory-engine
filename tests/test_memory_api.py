@@ -250,3 +250,39 @@ def test_multiple_accesses_update_importance_score():
     assert response.status_code == 200
     assert data["access_count"] == 2
     assert data["importance_score"] == 2
+
+#ranked memories test cases
+def test_ranked_memories_are_sorted_by_score():
+
+    memory_a = client.post(
+        "/memory-items",
+        json={"content": "Memory A"}
+    ).json()
+
+    memory_b = client.post(
+        "/memory-items",
+        json={"content": "Memory B"}
+    ).json()
+
+    client.get(f"/memory-items/{memory_a['id']}")
+    client.get(f"/memory-items/{memory_a['id']}")
+
+    client.get(f"/memory-items/{memory_b['id']}")
+
+    response = client.get("/memory-items/ranked")
+
+    assert response.status_code == 200
+
+    memories = response.json()
+
+    a_index = next(
+        i for i, memory in enumerate(memories)
+        if memory["id"] == memory_a["id"]
+    )
+
+    b_index = next(
+        i for i, memory in enumerate(memories)
+        if memory["id"] == memory_b["id"]
+    )
+
+    assert a_index < b_index

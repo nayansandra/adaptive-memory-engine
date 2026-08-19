@@ -85,3 +85,15 @@ def get_memory_and_track_access(memory_id: int, db: Session) -> Memory | None:
         return None
 
     return memory_repository.record_access(db, memory)
+
+def get_ranked_memories(db):
+
+    memories = get_memories(db)
+
+    ranked_memories = sorted(
+        memories,
+        key=lambda memory: calculate_effective_score(memory.importance_score, memory.last_accessed_at),
+        reverse=True
+    )
+
+    return ranked_memories
