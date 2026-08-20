@@ -3,10 +3,13 @@ from app.models.memory_db import Memory
 from datetime import datetime, timezone
 
 def get_by_id(db: Session, memory_id: int) -> Memory | None:
-    return db.query(Memory).filter(Memory.id == memory_id).first()
+    return (db.query(Memory)
+            .filter(Memory.id == memory_id)
+            .first())
 
 def get_all(db: Session) -> list[Memory]:
-    return db.query(Memory).all()
+    return (db.query(Memory)
+            .all())
 
 def create(db: Session, memory: Memory) -> Memory:
     db.add(memory)
@@ -35,3 +38,9 @@ def record_access(db: Session, memory: Memory) -> Memory:
     db.refresh(memory)
 
     return memory
+
+def search_by_content(db: Session, query: str) -> list[Memory]:
+
+    return (db.query(Memory)
+            .filter(Memory.content.ilike(f"%{query}%"))
+            .all())

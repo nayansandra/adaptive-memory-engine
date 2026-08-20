@@ -97,3 +97,20 @@ def get_ranked_memories(db):
     )
 
     return ranked_memories
+
+def search_memories(query: str, db: Session):
+
+    query = query.strip()
+
+    if not query:
+        raise ValueError("Search query cannot be empty or whitespace.")
+
+    memories = memory_repository.search_by_content(db, query)
+
+    ranked_memories = sorted(
+        memories,
+        key=lambda memory: calculate_effective_score(memory.importance_score,memory.last_accessed_at),
+        reverse=True
+        )
+        
+    return ranked_memories

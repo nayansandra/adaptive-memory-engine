@@ -20,6 +20,13 @@ def create_memory(memory: MemoryItemCreate, db: Session = Depends(get_db)):
 def get_ranked_memories(db: Session = Depends(get_db)):
     return memory_service.get_ranked_memories(db)
 
+@router.get("/memory-items/search", response_model=list[MemoryItem])
+def search_memories(query: str, db: Session = Depends(get_db)):
+    try:
+        return memory_service.search_memories(query, db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.get("/memory-items/{memory_id}", response_model=MemoryItem)
 def get_memory(memory_id: int, db: Session = Depends(get_db)):
     memory = memory_service.get_memory_and_track_access(memory_id, db)

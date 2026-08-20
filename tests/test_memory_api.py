@@ -286,3 +286,43 @@ def test_ranked_memories_are_sorted_by_score():
     )
 
     assert a_index < b_index
+
+#search test cases
+def test_search_returns_matching_memories():
+
+    client.post(
+        "/memory-items",
+        json={"content": "I studied PostgreSQL indexing"}
+    )
+
+    client.post(
+        "/memory-items",
+        json={"content": "I need to buy groceries"}
+    )
+
+    response = client.get(
+        "/memory-items/search?query=postgres"
+    )
+
+    assert response.status_code == 200
+
+    memories = response.json()
+
+    assert len(memories) >= 1
+
+    assert any(
+        "postgres" in memory["content"].lower()
+        for memory in memories
+    )
+
+def test_search_rejects_whitespace_query():
+
+    response = client.get(
+        "/memory-items/search?query=   "
+    )
+
+    assert response.status_code == 400
+
+    assert response.json() == {
+        "detail": "Search query cannot be empty or whitespace."
+    }
