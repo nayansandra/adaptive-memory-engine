@@ -27,6 +27,16 @@ def search_memories(query: str, db: Session = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/memory-items/semantic-search", response_model=list[MemoryItem])
+def semantic_search_memories(query: str, db: Session = Depends(get_db)):
+    try:
+        return memory_service.semantic_search(query, db)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
+
 @router.get("/memory-items/{memory_id}", response_model=MemoryItem)
 def get_memory(memory_id: int, db: Session = Depends(get_db)):
     memory = memory_service.get_memory_and_track_access(memory_id, db)
