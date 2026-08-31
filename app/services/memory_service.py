@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.memory_db import Memory
 from app.repositories import memory_repository
 from app.services import embedding_service
+from app.services.similarity_service import cosine_similarity
 
 def calculate_recency_factor(last_accessed_at):
 
@@ -118,4 +119,29 @@ def search_memories(query: str, db: Session):
         reverse=True
         )
         
+    return ranked_memories
+
+def semantic_search(query: str, db: Session):
+    if not query.strip():
+        raise ValueError("Search query cannot be empty or whitespace.")
+
+    query_embedding = embedding_service.generate_embedding(query)
+    memories = memory_repository.get_all(db)
+
+    scored_memories = []
+
+    for memory in memories:
+
+        if not memory.embedding:
+            continue
+
+        similarity = cosine_similarity(query_embedding, memory.embedding)
+
+        scored_memories.append((memory, similarity))
+    
+    scored_memories.sort(key=lambda item: item[1], reverse=True)
+
+    TOP_K = 10
+    ranked_memories = [memory for memory,score in scored_memories[:TOP_K]]
+
     return ranked_memories
