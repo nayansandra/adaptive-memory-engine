@@ -3,6 +3,7 @@ from app.models.memory import MemoryItemCreate, MemoryItemUpdate
 from sqlalchemy.orm import Session
 from app.models.memory_db import Memory
 from app.repositories import memory_repository
+from app.services import embedding_service
 
 def calculate_recency_factor(last_accessed_at):
 
@@ -31,6 +32,8 @@ def calculate_effective_score(importance_score: float, last_accessed_at) -> floa
     return importance_score * factor
 
 def create_memory(memory: MemoryItemCreate, db: Session) -> Memory:
+
+    embedding = embedding_service.generate_embedding(memory.content)
     now = datetime.now()
 
     db_memory = Memory(
@@ -40,6 +43,7 @@ def create_memory(memory: MemoryItemCreate, db: Session) -> Memory:
         updated_at=now,
         importance_score=0.0,
         access_count=0,
+        embedding=embedding,
     )
 
     return memory_repository.create(db,db_memory)
@@ -62,6 +66,7 @@ def update_memory(memory_id: int, update: MemoryItemUpdate, db: Session) -> Memo
 
     if update.content is not None:
         memory.content = update.content
+        memory.embedding = embedding_service.generate_embedding(update.content)
 
     memory.updated_at = datetime.now()
 
