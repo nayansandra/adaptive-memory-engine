@@ -145,3 +145,51 @@ def semantic_search(query: str, db: Session):
     ranked_memories = [memory for memory,score in scored_memories[:TOP_K]]
 
     return ranked_memories
+
+def hybrid_search(query: str, db: Session):
+
+    if not query.strip():
+        raise ValueError("Search query cannot be empty or whitespace.")
+
+    query_embedding = embedding_service.generate_embedding(query)
+
+    memories = memory_repository.get_all(db)
+
+    query_words = query.lower().split()
+
+    scored_memories = []
+
+    for memory in memories:
+
+        keyword_score = 0
+        text = (f"{memory.title} {memory.content}").lower()
+
+        for word in query_words:
+            if word in text:
+                keyword_score += 1
+
+        if not memory.embedding:
+            continue
+
+        semantic_score = cosine_similarity(
+            query_embedding,
+            memory.embedding
+        )
+
+        hybrid_score = keyword_score + semantic_score
+
+        scored_memories.append((memory, hybrid_score))
+
+        print(
+            memory.id,
+            keyword_score,
+            semantic_score,
+            hybrid_score
+        )
+    scored_memories.sort(key=lambda item: item[1], reverse=True)
+
+    TOP_K = 10
+
+    ranked_memories = [memory for memory, score in scored_memories[:TOP_K]]
+
+    return ranked_memories
